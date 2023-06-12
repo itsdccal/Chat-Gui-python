@@ -27,8 +27,9 @@ def handle(client):
             client.close()
             nickname = nicknames[index]
             nicknames.remove(nickname)
-            broadcast(f"{nickname} left the chat.\n".encode('utf-8'))
+            broadcast(f"====  {nickname} left the chat.  ====\n".encode('utf-8'))
             break
+
         
 def receive():
     while True:
@@ -42,7 +43,7 @@ def receive():
         clients.append(client)
 
         print(f"Nickname of the client is {nicknames}")
-        broadcast(f"{nickname} connected to the server!\n".encode('utf-8'))
+        broadcast(f"====  {nickname} connected to the server!  ====\n".encode('utf-8'))
         client.send("Connected to the server".encode('utf-8'))
 
         thread = threading.Thread(target=handle, args=(client,))

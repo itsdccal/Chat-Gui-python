@@ -3,9 +3,11 @@ import threading
 import tkinter
 import tkinter.scrolledtext
 from tkinter import simpledialog
+from ttkthemes import ThemedTk
 
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
+
 
 class Client:
     
@@ -28,33 +30,45 @@ class Client:
         receive_thread.start()
 
     def gui_loop(self):
-        self.win = tkinter.Tk()
-        self.win.configure(bg="lightgray")
-        
-        self.chat_label = tkinter.Label(self.win, text="Chat", bg="lightgray")
-        self.chat_label.config(font=("Arial", 12))
-        self.chat_label.pack(padx=20, pady=5)
+        self.win = ThemedTk(theme="black")
+        self.win.configure(bg="#161616")
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(self.win)
-        self.text_area.pack(padx=20, pady=5)
+
+        self.chat_label = tkinter.Label(self.win, text=f"{self.nickname}",bg="#E2856E", width=15)
+        self.chat_label.config(font=("Segoe UI Black", 12))
+        self.chat_label.grid(row=0, column=0, padx=20, pady=5, sticky='n')
+
+        self.text_area = tkinter.scrolledtext.ScrolledText(self.win, bg="#CCDAD1")
+        self.text_area.grid(row=1, column=0, padx=20, pady=5, sticky='n')
         self.text_area.config(state='disabled')
-        
-        self.msg_label = tkinter.Label(self.win, text="Message", bg="lightgray")
-        self.msg_label.config(font=("Arial", 12))
-        self.msg_label.pack(padx=20, pady=5)
-        
-        self.input_area = tkinter.Text(self.win, height=3)
-        self.input_area.pack(padx=20, pady=5)
-        
-        self.send_button = tkinter.Button(self.win, text="Send", command=self.write)
-        self.send_button.config(font=("Arial", 12))
-        self.send_button.pack(padx=20, pady=5)
-        
+
+        # self.msg_label = tkinter.Label(self.win, text="Message", bg="#E2856E", width=15)
+        # self.msg_label.config(font=("Segoe UI Black", 12))
+        # self.msg_label.grid(row=2, column=0, padx=20, pady=5, sticky='n')
+
+        self.input_area = tkinter.Text(self.win, height=2, bg="#CCDAD1")
+        self.input_area.grid(row=3, column=0, padx=20,pady=5, sticky='w')
+        # self.input_area.insert('1.0', 'Enter Message')
+        self.input_area.bind('<FocusIn>', self.clear_default_text)
+        self.input_area.bind('<FocusOut>', self.restore_default_text)
+
+        self.send_button = tkinter.Button(self.win, text="\u2708", command=self.write)
+        self.send_button.config(font=("Arial", 11))
+        self.send_button.grid(row=3, column=0, padx=5, sticky='e')
+
         self.gui_done = True
-        
+
         self.win.protocol("WM_DELETE_WINDOW", self.stop)
-        
+
         self.win.mainloop()
+
+    def clear_default_text(self, event):
+        if self.input_area.get('1.0', 'end-1c') == 'Enter message':
+            self.input_area.delete('1.0', 'end-1c')
+
+    def restore_default_text(self, event):
+        if not self.input_area.get('1.0', 'end-1c'):
+            self.input_area.insert('1.0', 'Enter message')
     
     def write(self):
         message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
@@ -88,6 +102,3 @@ class Client:
 
 client = Client(HOST, PORT)
 client = Client(HOST, PORT)
-
-
-
