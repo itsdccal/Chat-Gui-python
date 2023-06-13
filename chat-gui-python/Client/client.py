@@ -3,7 +3,7 @@ import threading
 import tkinter
 import tkinter.scrolledtext
 from tkinter import simpledialog
-from ttkthemes import ThemedTk
+# from ttkthemes import ThemedTk
 
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
@@ -30,7 +30,7 @@ class Client:
         receive_thread.start()
 
     def gui_loop(self):
-        self.win = ThemedTk(theme="black")
+        self.win = tkinter.Tk()
         self.win.configure(bg="#161616")
 
 
