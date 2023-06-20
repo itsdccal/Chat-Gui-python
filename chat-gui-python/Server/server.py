@@ -1,58 +1,133 @@
 import socket
+import struct
+import pickle
 import threading
 
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((HOST, PORT))
+server_socket.listen(4)
 
-clients = []
-nicknames = []
+clients_connected = {}
+clients_data = {}
+count = 1
 
-def broadcast(message):
-    for client in clients:
-        client.send(message)
-    
-def handle(client):
+
+def connection_requests():
+    global count
+    while True:
+        print("Waiting for connection...")
+        client_socket, address = server_socket.accept()
+
+        print(f"Connections from {address} has been established")
+        print(len(clients_connected))
+        if len(clients_connected) == 4:
+            client_socket.send('not_allowed'.encode())
+
+            client_socket.close()
+            continue
+        else:
+            client_socket.send('allowed'.encode())
+
+        try:
+            client_name = client_socket.recv(1024).decode('utf-8')
+        except:
+            print(f"{address} disconnected")
+            client_socket.close()
+            continue
+
+        print(f"{address} identified itself as {client_name}")
+
+        clients_connected[client_socket] = (client_name, count)
+
+        image_size_bytes = client_socket.recv(1024)
+        image_size_int = struct.unpack('i', image_size_bytes)[0]
+
+        client_socket.send('received'.encode())
+        image_extension = client_socket.recv(1024).decode()
+
+        b = b''
+        while True:
+            image_bytes = client_socket.recv(1024)
+            b += image_bytes
+            if len(b) == image_size_int:
+                break
+
+        clients_data[count] = (client_name, b, image_extension)
+
+        clients_data_bytes = pickle.dumps(clients_data)
+        clients_data_length = struct.pack('i', len(clients_data_bytes))
+
+        client_socket.send(clients_data_length)
+        client_socket.send(clients_data_bytes)
+
+        if client_socket.recv(1024).decode() == 'image_received':
+            client_socket.send(struct.pack('i', count))
+
+            for client in clients_connected:
+                if client != client_socket:
+                    client.send('notification'.encode())
+                    data = pickle.dumps(
+                        {'message': f"{clients_connected[client_socket][0]} joined the chat", 'extension': image_extension,
+                         'image_bytes': b, 'name': clients_connected[client_socket][0], 'n_type': 'joined', 'id': count})
+                    data_length_bytes = struct.pack('i', len(data))
+                    client.send(data_length_bytes)
+
+                    client.send(data)
+        count += 1
+        t = threading.Thread(target=receive_data, args=(client_socket,))
+        t.start()
+
+
+def receive_data(client_socket):
     while True:
         try:
-            message = client.recv(1024)
-            print(f"{nicknames[clients.index(client)]} says: {message.decode('utf-8')}")
-            broadcast(message)
-        except:
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
-            nickname = nicknames[index]
-            nicknames.remove(nickname)
-            broadcast(f"====  {nickname} left the chat.  ====\n".encode('utf-8'))
+            data_bytes = client_socket.recv(1024)
+        except ConnectionResetError:
+            print(f"{clients_connected[client_socket][0]} disconnected")
+
+            for client in clients_connected:
+                if client != client_socket:
+                    client.send('notification'.encode())
+
+                    data = pickle.dumps({'message': f"{clients_connected[client_socket][0]} left the chat",
+                                         'id': clients_connected[client_socket][1], 'n_type': 'left'})
+
+                    data_length_bytes = struct.pack('i', len(data))
+                    client.send(data_length_bytes)
+
+                    client.send(data)
+
+            del clients_data[clients_connected[client_socket][1]]
+            del clients_connected[client_socket]
+            client_socket.close()
+            break
+        except ConnectionAbortedError:
+            print(f"{clients_connected[client_socket][0]} disconnected unexpectedly.")
+
+            for client in clients_connected:
+                if client != client_socket:
+                    client.send('notification'.encode())
+                    data = pickle.dumps({'message': f"{clients_connected[client_socket][0]} left the chat",
+                                         'id': clients_connected[client_socket][1], 'n_type': 'left'})
+                    data_length_bytes = struct.pack('i', len(data))
+                    client.send(data_length_bytes)
+                    client.send(data)
+
+            del clients_data[clients_connected[client_socket][1]]
+            del clients_connected[client_socket]
+            client_socket.close()
             break
 
-        
-def receive():
-    while True:
-        client, address = server.accept()
-        print(f"Connected with {str(address)}!")
-        
-        client.send("NICK".encode('utf-8'))
-        nickname = client.recv(1024).decode('utf-8')
-        
-        nicknames.append(nickname)
-        clients.append(client)
-
-        print(f"Nickname of the client is {nicknames}")
-        broadcast(f"====  {nickname} connected to the server!  ====\n".encode('utf-8'))
-        client.send("Connected to the server".encode('utf-8'))
-
-        thread = threading.Thread(target=handle, args=(client,))
-        thread.start()
-
-print("Server running...")
-receive()
+        for client in clients_connected:
+            if client != client_socket:
+                client.send('message'.encode())
+                client.send(data_bytes)
 
 
+connection_requests()
 
 
 
