@@ -1,5 +1,7 @@
+import os
 import socket
 import threading
+from tkinter import filedialog
 import tkinter.scrolledtext
 import tkinter as tk
 from PIL import ImageTk, Image
@@ -43,29 +45,52 @@ class firstScreen(tk.Tk):
 
         tk.Label(self.first_frame, image=background).place(x=0, y=0)
 
-        head = tk.Label(self.first_frame, text="Sign Up",font="Segoe UI Black", bg="grey")
+        head = tk.Label(self.first_frame, text="Sign Up",
+                        font="Segoe UI Black", bg="grey")
         head.place(relwidth=1, y=24)
 
         self.profile_label = tk.Label(self.first_frame, bg="grey")
         self.profile_label.place(x=350, y=75, width=150, height=140)
 
-        upload_button = tk.Button(self.first_frame, image=upload_image, compound="left", text="Upload Image",cursor="hand2", font="Segoe UI Black", padx=2, command=self.add_photo)
+        upload_button = tk.Button(self.first_frame, image=upload_image, compound="left",
+                                  text="Upload Image", cursor="hand2", font="Segoe UI Black", padx=2, command=self.add_photo)
         upload_button.place(x=345, y=220)
 
         self.username = tk.Label(
             self.first_frame, text="Username", font="Segoe UI Black", bg="grey")
         self.username.place(x=80, y=150)
 
-        self.username_entry = tk.Entry(self.first_frame,  font="Segoe UI Black", width=10,highlightcolor="blue", highlightthickness=1)
+        self.username_entry = tk.Entry(
+            self.first_frame,  font="Segoe UI Black", width=10, highlightcolor="blue", highlightthickness=1)
         self.username_entry.place(x=195, y=150)
 
         self.username_entry.focus_set()
 
-        submit_button = tk.Button(self.first_frame, text="Connect", font="Segoe UI Black", padx=30, cursor="hand2",command=self.process_data, bg="#16cade", relief="solid", bd=2)
+        submit_button = tk.Button(self.first_frame, text="Connect", font="Segoe UI Black", padx=30,
+                                  cursor="hand2", command=self.process_data, bg="#16cade", relief="solid", bd=2)
 
         submit_button.place(x=200, y=275)
 
         self.mainloop()
+
+    def add_photo(self):
+        self.image_path = filedialog.askopenfilename()
+        image_name = os.path.basename(self.image_path)
+        self.image_extension = image_name[image_name.rfind('.')+1:]
+
+        if self.image_path:
+            user_image = Image.open(self.image_path)
+            user_image = user_image.resize((150, 140), Image.ANTIALIAS)
+            user_image.save('resized'+image_name)
+            user_image.close()
+
+            self.image_path = 'resized'+image_name
+            user_image = Image.open(self.image_path)
+
+            user_image = ImageTk.PhotoImage(user_image)
+            self.profile_label.image = user_image
+            self.profile_label.config(image=user_image)
+
 
 class Client:
     def __init__(self, host, port):
