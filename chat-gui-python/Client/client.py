@@ -1,3 +1,4 @@
+import datetime
 import os
 import pickle
 import socket
@@ -171,7 +172,6 @@ class ChatScreen(tk.Canvas):
 
         self.clients_connected = clients_connected
 
-        
         self.parent.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.client_socket = client_socket
@@ -185,7 +185,6 @@ class ChatScreen(tk.Canvas):
         user_image = user_image.resize((40, 40), Image.ANTIALIAS)
         self.user_image = ImageTk.PhotoImage(user_image)
 
-
         global chat_room_icon
         chat_room_icon = Image.open('images/icon.png')
         chat_room_icon = chat_room_icon.resize((60, 60), Image.ANTIALIAS)
@@ -193,7 +192,6 @@ class ChatScreen(tk.Canvas):
 
         self.y = 140
         self.clients_online_labels = {}
-
 
         self.create_text(545, 120, text="Online",
                          font="Segoe UI Black", fill="#40C961")
@@ -242,56 +240,113 @@ class ChatScreen(tk.Canvas):
         self.entry.place(x=40, y=681)
 
         self.entry.focus_set()
+        
+        # -------------------------------------------------------emoji-----------------------------------------------------------------
+
+        emoji_data = [('emojis/u0001f44a.png', '\U0001F44A'), ('emojis/u0001f44c.png', '\U0001F44C'), ('emojis/u0001f44d.png', '\U0001F44D'),
+                      ('emojis/u0001f495.png', '\U0001F495'), ('emojis/u0001f496.png','\U0001F496'), ('emojis/u0001f4a6.png', '\U0001F4A6'),
+                      ('emojis/u0001f4a9.png', '\U0001F4A9'), ('emojis/u0001f4af.png','\U0001F4AF'), ('emojis/u0001f595.png', '\U0001F595'),
+                      ('emojis/u0001f600.png', '\U0001F600'), ('emojis/u0001f602.png','\U0001F602'), ('emojis/u0001f603.png', '\U0001F603'),
+                      ('emojis/u0001f605.png', '\U0001F605'), ('emojis/u0001f606.png','\U0001F606'), ('emojis/u0001f608.png', '\U0001F608'),
+                      ('emojis/u0001f60d.png', '\U0001F60D'), ('emojis/u0001f60e.png','\U0001F60E'), ('emojis/u0001f60f.png', '\U0001F60F'),
+                      ('emojis/u0001f610.png', '\U0001F610'), ('emojis/u0001f618.png','\U0001F618'), ('emojis/u0001f61b.png', '\U0001F61B'),
+                      ('emojis/u0001f61d.png', '\U0001F61D'), ('emojis/u0001f621.png','\U0001F621'), ('emojis/u0001f624.png', '\U0001F621'),
+                      ('emojis/u0001f631.png', '\U0001F631'), ('emojis/u0001f632.png','\U0001F632'), ('emojis/u0001f634.png', '\U0001F634'),
+                      ('emojis/u0001f637.png', '\U0001F637'), ('emojis/u0001f642.png','\U0001F642'), ('emojis/u0001f64f.png', '\U0001F64F'),
+                      ('emojis/u0001f920.png', '\U0001F920'), ('emojis/u0001f923.png', '\U0001F923'), ('emojis/u0001f928.png', '\U0001F928')]
+
+        emoji_x_pos = 490
+        emoji_y_pos = 520
+        for Emoji in emoji_data:
+            global emojis
+            emojis = Image.open(Emoji[0])
+            emojis = emojis.resize((20, 20), Image.ANTIALIAS)
+            emojis = ImageTk.PhotoImage(emojis)
+
+            emoji_unicode = Emoji[1]
+            emoji_label = tk.Label(
+                self, image=emojis, text=emoji_unicode, bg="#194548", cursor="hand2")
+            emoji_label.image = emojis
+            emoji_label.place(x=emoji_x_pos, y=emoji_y_pos)
+            emoji_label.bind('<Button-1>', lambda x: self.insert_emoji(x))
+
+            emoji_x_pos += 25
+            cur_index = emoji_data.index(Emoji)
+            if (cur_index + 1) % 6 == 0:
+                emoji_y_pos += 25
+                emoji_x_pos = 490
+
+        # ------------------------------------------------------------------------------------
+
+        m_frame = tk.Frame(self.scrollable_frame, bg="#d9d5d4")
+
+        t_label = tk.Label(m_frame, bg="white", text=datetime.now().strftime(
+            '%H:%M'), font="Segoe UI Black")
+        t_label.pack()
+
+        m_label = tk.Label(m_frame, wraplength=250, text={self.parent.user},
+                           font="Segoe UI Black", bg="black")
+        m_label.pack(fill="x")
+
+        m_frame.pack(pady=10, padx=10, fill="x", expand=True, anchor="e")
+
+        self.pack(fill="both", expand=True)
+
+        self.clients_online([])
+
+        t = threading.Thread(target=self.receive_data)
+        t.setDaemon(True)
+        t.start()
 
 
-class Client:
-    def __init__(self, host, port):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((host, port))
+# class Client:
+#     def __init__(self, host, port):
+#         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#         self.sock.connect((host, port))
 
-        self.nickname_window = NicknameWindow()
-        self.nickname = self.nickname_window.nickname
+#         self.nickname_window = NicknameWindow()
+#         self.nickname = self.nickname_window.nickname
 
-        self.gui_done = False
-        self.running = True
+#         self.gui_done = False
+#         self.running = True
 
-        gui_thread = threading.Thread(target=self.gui_loop)
-        receive_thread = threading.Thread(target=self.receive)
+#         gui_thread = threading.Thread(target=self.gui_loop)
+#         receive_thread = threading.Thread(target=self.receive)
 
-        gui_thread.start()
-        receive_thread.start()
+#         gui_thread.start()
+#         receive_thread.start()
 
-    def gui_loop(self):
-        self.win = tkinter.Tk()
-        self.win.title("chat room")
-        self.win.configure(bg="#161616")
+#     def gui_loop(self):
+#         self.win = tkinter.Tk()
+#         self.win.title("chat room")
+#         self.win.configure(bg="#161616")
 
-        self.chat_label = tkinter.Label(
-            self.win, text=f"{self.nickname}", bg="#E2856E", width=15)
-        self.chat_label.config(font=("Segoe UI Black", 12))
-        self.chat_label.grid(row=0, column=0, padx=20, pady=5, sticky='n')
+#         self.chat_label = tkinter.Label(
+#             self.win, text=f"{self.nickname}", bg="#E2856E", width=15)
+#         self.chat_label.config(font=("Segoe UI Black", 12))
+#         self.chat_label.grid(row=0, column=0, padx=20, pady=5, sticky='n')
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(
-            self.win, bg="#CCDAD1")
-        self.text_area.grid(row=1, column=0, padx=20, pady=5, sticky='n')
-        self.text_area.config(state='disabled')
+#         self.text_area = tkinter.scrolledtext.ScrolledText(
+#             self.win, bg="#CCDAD1")
+#         self.text_area.grid(row=1, column=0, padx=20, pady=5, sticky='n')
+#         self.text_area.config(state='disabled')
 
-        self.input_area = tkinter.Text(self.win, height=2, bg="#CCDAD1")
-        self.input_area.grid(row=3, column=0, padx=20, pady=5, sticky='w')
-        self.input_area.bind('<FocusIn>', self.clear_default_text)
-        self.input_area.bind('<FocusOut>', self.restore_default_text)
-        self.input_area.insert('1.0', 'Enter message')
+#         self.input_area = tkinter.Text(self.win, height=2, bg="#CCDAD1")
+#         self.input_area.grid(row=3, column=0, padx=20, pady=5, sticky='w')
+#         self.input_area.bind('<FocusIn>', self.clear_default_text)
+#         self.input_area.bind('<FocusOut>', self.restore_default_text)
+#         self.input_area.insert('1.0', 'Enter message')
 
-        self.send_button = tkinter.Button(
-            self.win, text="\u2708", command=self.write)
-        self.send_button.config(font=("Arial", 11))
-        self.send_button.grid(row=3, column=0, padx=5, sticky='e')
+#         self.send_button = tkinter.Button(
+#             self.win, text="\u2708", command=self.write)
+#         self.send_button.config(font=("Arial", 11))
+#         self.send_button.grid(row=3, column=0, padx=5, sticky='e')
 
-        self.gui_done = True
+#         self.gui_done = True
 
-        self.win.protocol("WM_DELETE_WINDOW", self.stop)
+#         self.win.protocol("WM_DELETE_WINDOW", self.stop)
 
-        self.win.mainloop()
+#         self.win.mainloop()
 
     def clear_default_text(self, event):
         if self.input_area.get('1.0', 'end-1c') == 'Enter message':
