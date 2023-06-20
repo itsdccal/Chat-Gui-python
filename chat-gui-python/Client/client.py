@@ -8,6 +8,65 @@ HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
 
 
+class firstScreen(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        screen_width, screen_height = self.winfo_screenwidth(), self.winfo_screenheight()
+
+        self.x_co = int((screen_width / 2) - (550 / 2))
+        self.y_co = int((screen_height / 2) - (400 / 2)) - 80
+        self.geometry(f"550x400+{self.x_co}+{self.y_co}")
+        self.title("Chat Room")
+
+        self.user = None
+        self.image_extension = None
+        self.image_path = None
+
+        self.first_frame = tk.Frame(self, bg="sky blue")
+        self.first_frame.pack(fill="both", expand=True)
+
+        app_icon = Image.open('images/icon.png')
+        app_icon = ImageTk.PhotoImage(app_icon)
+
+        self.iconphoto(False, app_icon)
+
+        background = Image.open("images/background-chat.jpg")
+        background = background.resize((550, 400), Image.ANTIALIAS)
+        background = ImageTk.PhotoImage(background)
+
+        upload_image = Image.open('images/send-img.png')
+        upload_image = upload_image.resize((25, 25), Image.ANTIALIAS)
+        upload_image = ImageTk.PhotoImage(upload_image)
+
+        self.user_image = 'images/user.png'
+
+        tk.Label(self.first_frame, image=background).place(x=0, y=0)
+
+        head = tk.Label(self.first_frame, text="Sign Up",font="Segoe UI Black", bg="grey")
+        head.place(relwidth=1, y=24)
+
+        self.profile_label = tk.Label(self.first_frame, bg="grey")
+        self.profile_label.place(x=350, y=75, width=150, height=140)
+
+        upload_button = tk.Button(self.first_frame, image=upload_image, compound="left", text="Upload Image",cursor="hand2", font="Segoe UI Black", padx=2, command=self.add_photo)
+        upload_button.place(x=345, y=220)
+
+        self.username = tk.Label(
+            self.first_frame, text="Username", font="Segoe UI Black", bg="grey")
+        self.username.place(x=80, y=150)
+
+        self.username_entry = tk.Entry(self.first_frame,  font="Segoe UI Black", width=10,highlightcolor="blue", highlightthickness=1)
+        self.username_entry.place(x=195, y=150)
+
+        self.username_entry.focus_set()
+
+        submit_button = tk.Button(self.first_frame, text="Connect", font="Segoe UI Black", padx=30, cursor="hand2",command=self.process_data, bg="#16cade", relief="solid", bd=2)
+
+        submit_button.place(x=200, y=275)
+
+        self.mainloop()
+
 class Client:
     def __init__(self, host, port):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
