@@ -1,39 +1,11 @@
 import socket
 import threading
-import tkinter
 import tkinter.scrolledtext
+import tkinter as tk
+from PIL import ImageTk, Image
 
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
-
-
-class NicknameWindow:
-    def __init__(self):
-        self.win = tkinter.Tk()
-        self.win.title("Enter Nickname")
-        self.win.configure(bg="#161616")
-
-        self.label = tkinter.Label(
-            self.win, text="Please choose a nickname", fg="#E2856E", bg="#161616")
-        self.label.config(font=("Segoe UI", 12))
-        self.label.pack(pady=20)
-
-        self.nickname_entry = tkinter.Entry(self.win, bg="#CCDAD1")
-        self.nickname_entry.config(font=("Segoe UI", 12))
-        self.nickname_entry.pack(pady=10)
-
-        self.ok_button = tkinter.Button(
-            self.win, text="OK", command=self.get_nickname, width=10)
-        self.ok_button.config(font=("Arial", 12))
-        self.ok_button.pack(pady=10)
-
-        self.nickname = None
-
-        self.win.mainloop()
-
-    def get_nickname(self):
-        self.nickname = self.nickname_entry.get()
-        self.win.destroy()
 
 
 class Client:
