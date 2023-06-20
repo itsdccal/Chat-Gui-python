@@ -347,15 +347,6 @@ class ChatScreen(tk.Canvas):
 #         self.win.protocol("WM_DELETE_WINDOW", self.stop)
 
 #         self.win.mainloop()
-
-    def clear_default_text(self, event):
-        if self.input_area.get('1.0', 'end-1c') == 'Enter message':
-            self.input_area.delete('1.0', 'end-1c')
-
-    def restore_default_text(self, event):
-        if not self.input_area.get('1.0', 'end-1c'):
-            self.input_area.insert('1.0', 'Enter message')
-
     def write(self):
         message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
         self.sock.send(message.encode('utf-8'))
@@ -368,22 +359,36 @@ class ChatScreen(tk.Canvas):
         exit(0)
 
     def receive(self):
-        while self.running:
+        while True:
             try:
-                message = self.sock.recv(1024).decode('utf-8')
-                if message == 'NICK':
-                    self.sock.send(self.nickname.encode('utf-8'))
+                data_type = self.client_socket.recv(1024).decode()
+
+                if data_type == 'notification':
+                    data_size = self.client_socket.recv(2048)
+                    data_size_int = struct.unpack('i', data_size)[0]
+
+                    b = b''
+                    while True:
+                        data_bytes = self.client_socket.recv(1024)
+                        b += data_bytes
+                        if len(b) == data_size_int:
+                            break
+                    data = pickle.loads(b)
+                    self.notification_format(data)
+
                 else:
-                    if self.gui_done:
-                        self.text_area.config(state='normal')
-                        self.text_area.insert('end', f"{message}\n")
-                        self.text_area.yview('end')
-                        self.text_area.config(state='disabled')
+                    data_bytes = self.client_socket.recv(1024)
+                    data = pickle.loads(data_bytes)
+                    self.received_message_format(data)
+
             except ConnectionAbortedError:
+                print("you disconnected ...")
+                self.client_socket.close()
                 break
-            except:
-                print("Error")
-                self.sock.close()
+            except ConnectionResetError:
+                messagebox.showinfo(title='No Connection !', message="Server offline..try connecting again later")
+                self.client_socket.close()
+                self.first_screen()
                 break
 
 
