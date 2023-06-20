@@ -1,7 +1,9 @@
 import os
+import pickle
 import socket
+import struct
 import threading
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import tkinter.scrolledtext
 import tkinter as tk
 from PIL import ImageTk, Image
@@ -90,6 +92,61 @@ class firstScreen(tk.Tk):
             user_image = ImageTk.PhotoImage(user_image)
             self.profile_label.image = user_image
             self.profile_label.config(image=user_image)
+
+    def connect(self):
+        if self.username_entry.get():
+            self.profile_label.config(image="")
+
+            if len(self.username_entry.get().strip()) > 6:
+                self.user = self.username_entry.get()[:6] + "."
+            else:
+                self.user = self.username_entry.get()
+
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                client_socket.connect((HOST, PORT))
+                status = client_socket.recv(1024).decode()
+                if status == 'not_allowed':
+                    client_socket.close()
+                    messagebox.showinfo(title="Can't connect!", message='Sorry, server is completely occupied. Try again later.')
+                    return
+            except ConnectionRefusedError:
+                messagebox.showinfo(title="Can't connect!", message="Server is offline, try again later.")
+                print("Server is offline, try again later.")
+                return
+
+            client_socket.send(self.user.encode('utf-8'))
+
+            if not self.image_path:
+                self.image_path = self.user_image
+            with open(self.image_path, 'rb') as image_data:
+                image_bytes = image_data.read()
+
+            image_len = len(image_bytes)
+            image_len_bytes = struct.pack('i', image_len)
+            client_socket.send(image_len_bytes)
+
+            if client_socket.recv(1024).decode() == 'received':
+                client_socket.send(str(self.image_extension).strip().encode())
+
+            client_socket.send(image_bytes)
+
+            clients_data_size_bytes = client_socket.recv(1024 * 8)
+            clients_data_size_int = struct.unpack('i', clients_data_size_bytes)[0]
+            b = b''
+            while True:
+                clients_data_bytes = client_socket.recv(1024)
+                b += clients_data_bytes
+                if len(b) == clients_data_size_int:
+                    break
+
+            clients_connected = pickle.loads(b)
+
+            client_socket.send('image_received'.encode())
+
+            user_id = struct.unpack('i', client_socket.recv(1024))[0]
+            print(f"{self.user} is user no. {user_id}")
+            
 
 
 class Client:
