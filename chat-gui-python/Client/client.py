@@ -2,57 +2,80 @@ import socket
 import threading
 import tkinter
 import tkinter.scrolledtext
-from tkinter import simpledialog
-# from ttkthemes import ThemedTk
 
 HOST = socket.gethostbyname(socket.gethostname())
 PORT = 6969
 
 
+class NicknameWindow:
+    def __init__(self):
+        self.win = tkinter.Tk()
+        self.win.title("Enter Nickname")
+        self.win.configure(bg="#161616")
+
+        self.label = tkinter.Label(
+            self.win, text="Please choose a nickname", fg="#E2856E", bg="#161616")
+        self.label.config(font=("Segoe UI", 12))
+        self.label.pack(pady=20)
+
+        self.nickname_entry = tkinter.Entry(self.win, bg="#CCDAD1")
+        self.nickname_entry.config(font=("Segoe UI", 12))
+        self.nickname_entry.pack(pady=10)
+
+        self.ok_button = tkinter.Button(
+            self.win, text="OK", command=self.get_nickname, width=10)
+        self.ok_button.config(font=("Arial", 12))
+        self.ok_button.pack(pady=10)
+
+        self.nickname = None
+
+        self.win.mainloop()
+
+    def get_nickname(self):
+        self.nickname = self.nickname_entry.get()
+        self.win.destroy()
+
+
 class Client:
-    
     def __init__(self, host, port):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
 
-        msg = tkinter.Tk()
-        msg.withdraw()
-
-        self.nickname = simpledialog.askstring("Nickname", "Please choose a nickname", parent=msg)
+        self.nickname_window = NicknameWindow()
+        self.nickname = self.nickname_window.nickname
 
         self.gui_done = False
         self.running = True
-        
+
         gui_thread = threading.Thread(target=self.gui_loop)
         receive_thread = threading.Thread(target=self.receive)
-        
+
         gui_thread.start()
         receive_thread.start()
 
     def gui_loop(self):
         self.win = tkinter.Tk()
+        self.win.title("chat room")
         self.win.configure(bg="#161616")
 
-
-        self.chat_label = tkinter.Label(self.win, text=f"{self.nickname}",bg="#E2856E", width=15)
+        self.chat_label = tkinter.Label(
+            self.win, text=f"{self.nickname}", bg="#E2856E", width=15)
         self.chat_label.config(font=("Segoe UI Black", 12))
         self.chat_label.grid(row=0, column=0, padx=20, pady=5, sticky='n')
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(self.win, bg="#CCDAD1")
+        self.text_area = tkinter.scrolledtext.ScrolledText(
+            self.win, bg="#CCDAD1")
         self.text_area.grid(row=1, column=0, padx=20, pady=5, sticky='n')
         self.text_area.config(state='disabled')
 
-        # self.msg_label = tkinter.Label(self.win, text="Message", bg="#E2856E", width=15)
-        # self.msg_label.config(font=("Segoe UI Black", 12))
-        # self.msg_label.grid(row=2, column=0, padx=20, pady=5, sticky='n')
-
         self.input_area = tkinter.Text(self.win, height=2, bg="#CCDAD1")
-        self.input_area.grid(row=3, column=0, padx=20,pady=5, sticky='w')
-        # self.input_area.insert('1.0', 'Enter Message')
+        self.input_area.grid(row=3, column=0, padx=20, pady=5, sticky='w')
         self.input_area.bind('<FocusIn>', self.clear_default_text)
         self.input_area.bind('<FocusOut>', self.restore_default_text)
+        self.input_area.insert('1.0', 'Enter message')
 
-        self.send_button = tkinter.Button(self.win, text="\u2708", command=self.write)
+        self.send_button = tkinter.Button(
+            self.win, text="\u2708", command=self.write)
         self.send_button.config(font=("Arial", 11))
         self.send_button.grid(row=3, column=0, padx=5, sticky='e')
 
@@ -69,18 +92,18 @@ class Client:
     def restore_default_text(self, event):
         if not self.input_area.get('1.0', 'end-1c'):
             self.input_area.insert('1.0', 'Enter message')
-    
+
     def write(self):
         message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
         self.sock.send(message.encode('utf-8'))
         self.input_area.delete('1.0', 'end')
-        
+
     def stop(self):
         self.running = False
         self.win.destroy()
         self.sock.close()
         exit(0)
-        
+
     def receive(self):
         while self.running:
             try:
@@ -100,5 +123,5 @@ class Client:
                 self.sock.close()
                 break
 
-client = Client(HOST, PORT)
+
 client = Client(HOST, PORT)
