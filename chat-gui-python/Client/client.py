@@ -347,16 +347,7 @@ class ChatScreen(tk.Canvas):
 #         self.win.protocol("WM_DELETE_WINDOW", self.stop)
 
 #         self.win.mainloop()
-    def write(self):
-        message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
-        self.sock.send(message.encode('utf-8'))
-        self.input_area.delete('1.0', 'end')
 
-    def stop(self):
-        self.running = False
-        self.win.destroy()
-        self.sock.close()
-        exit(0)
 
     def receive(self):
         while True:
@@ -390,6 +381,13 @@ class ChatScreen(tk.Canvas):
                 self.client_socket.close()
                 self.first_screen()
                 break
-
-
-client = Client(HOST, PORT)
+def closing_chat(self):
+        if self.window == 'ChatScreen':
+            res = messagebox.askyesno(title='Warning !',message="Do you really want to disconnect ?")
+            if res:
+                import os
+                os.remove(self.all_user_image[self.user_id])
+                self.client_socket.close()
+                self.first_screen()
+        else:
+            self.parent.destroy()
