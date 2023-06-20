@@ -3,7 +3,7 @@ import pickle
 import socket
 import struct
 import threading
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import tkinter.scrolledtext
 import tkinter as tk
 from PIL import ImageTk, Image
@@ -108,10 +108,12 @@ class firstScreen(tk.Tk):
                 status = client_socket.recv(1024).decode()
                 if status == 'not_allowed':
                     client_socket.close()
-                    messagebox.showinfo(title="Can't connect!", message='Sorry, server is completely occupied. Try again later.')
+                    messagebox.showinfo(
+                        title="Can't connect!", message='Sorry, server is completely occupied. Try again later.')
                     return
             except ConnectionRefusedError:
-                messagebox.showinfo(title="Can't connect!", message="Server is offline, try again later.")
+                messagebox.showinfo(
+                    title="Can't connect!", message="Server is offline, try again later.")
                 print("Server is offline, try again later.")
                 return
 
@@ -132,7 +134,8 @@ class firstScreen(tk.Tk):
             client_socket.send(image_bytes)
 
             clients_data_size_bytes = client_socket.recv(1024 * 8)
-            clients_data_size_int = struct.unpack('i', clients_data_size_bytes)[0]
+            clients_data_size_int = struct.unpack(
+                'i', clients_data_size_bytes)[0]
             b = b''
             while True:
                 clients_data_bytes = client_socket.recv(1024)
@@ -146,7 +149,99 @@ class firstScreen(tk.Tk):
 
             user_id = struct.unpack('i', client_socket.recv(1024))[0]
             print(f"{self.user} is user no. {user_id}")
-            
+            ChatScreen(self, self.first_frame, client_socket,
+                       clients_connected, user_id)
+
+
+class ChatScreen(tk.Canvas):
+    def __init__(self, parent, first_frame, client_socket, clients_connected, user_id):
+        super().__init__(parent, bg="#2b2b2b")
+
+        self.window = 'ChatScreen'
+
+        self.first_frame = first_frame
+        self.first_frame.pack_forget()
+
+        self.parent = parent
+        self.parent.bind('<Return>', lambda e: self.sent_message_format(e))
+
+        self.all_user_image = {}
+
+        self.user_id = user_id
+
+        self.clients_connected = clients_connected
+
+        
+        self.parent.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.client_socket = client_socket
+        screen_width, screen_height = self.winfo_screenwidth(), self.winfo_screenheight()
+
+        x_co = int((screen_width / 2) - (680 / 2))
+        y_co = int((screen_height / 2) - (750 / 2)) - 80
+        self.parent.geometry(f"680x750+{x_co}+{y_co}")
+
+        user_image = Image.open(self.parent.image_path)
+        user_image = user_image.resize((40, 40), Image.ANTIALIAS)
+        self.user_image = ImageTk.PhotoImage(user_image)
+
+
+        global chat_room_icon
+        chat_room_icon = Image.open('images/icon.png')
+        chat_room_icon = chat_room_icon.resize((60, 60), Image.ANTIALIAS)
+        chat_room_icon = ImageTk.PhotoImage(chat_room_icon)
+
+        self.y = 140
+        self.clients_online_labels = {}
+
+
+        self.create_text(545, 120, text="Online",
+                         font="Segoe UI Black", fill="#40C961")
+
+        tk.Label(self, text="   ", font="Segoe UI Black",
+                 bg="#b5b3b3").place(x=4, y=29)
+
+        tk.Label(self, text="chat room", font="Segoe UI Black", padx=20, fg="green",
+                 bg="#b5b3b3", anchor="w", justify="left").place(x=88, y=29, relwidth=1)
+
+        self.create_image(60, 40, image=chat_room_icon)
+
+        container = tk.Frame(self)
+
+        container.place(x=40, y=120, width=450, height=550)
+        self.canvas = tk.Canvas(container, bg="#595656")
+        self.scrollable_frame = tk.Frame(self.canvas, bg="#595656")
+
+        scrollable_window = self.canvas.create_window(
+            (0, 0), window=self.scrollable_frame, anchor="nw")
+
+        def configure_scroll_region(e):
+            self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+
+        def resize_frame(e):
+            self.canvas.itemconfig(scrollable_window, width=e.width)
+
+        self.scrollable_frame.bind("<Configure>", configure_scroll_region)
+
+        scrollbar = ttk.Scrollbar(
+            container, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.yview_moveto(1.0)
+
+        scrollbar.pack(side="right", fill="y")
+
+        self.canvas.bind("<Configure>", resize_frame)
+        self.canvas.pack(fill="both", expand=True)
+
+        send_button = tk.Button(self, text="Send", fg="#83eaf7", font="Segoe UI Black", bg="#7d7d7d", padx=10,
+                                relief="solid", bd=2, command=self.sent_message_format)
+        send_button.place(x=400, y=680)
+
+        self.entry = tk.Text(self, font="Segoe UI Black", width=38, height=2,
+                             highlightcolor="blue", highlightthickness=1)
+        self.entry.place(x=40, y=681)
+
+        self.entry.focus_set()
 
 
 class Client:
