@@ -11,10 +11,9 @@ import threading
 import struct
 
 # Mengambil alamat IP lokal
-HOST = '10.5.30.172'
+HOST = '10.5.30.90'
 # Port yang akan digunakan untuk koneksi
 PORT = 6969
-
 
 class FirstScreen(tk.Tk):
     def __init__(self):
@@ -44,7 +43,7 @@ class FirstScreen(tk.Tk):
 
         # Menyiapkan gambar untuk tombol unggah gambar
         upload_image = Image.open('images/send-img.png')
-        upload_image = upload_image.resize((25, 25), Image.ANTIALIAS)
+        upload_image = upload_image.resize((25, 25), Image.LANCZOS)
         upload_image = ImageTk.PhotoImage(upload_image)
 
         # Mengatur gambar pengguna default
@@ -84,7 +83,7 @@ class FirstScreen(tk.Tk):
         submit_button.place(x=248, y=388.4)
 
         # Memulai perulangan utama
-        self.first_frame.mainloop()()
+        self.mainloop()()
 
     def add_photo(self):
         # Memilih path file gambar menggunakan dialog file
@@ -99,7 +98,7 @@ class FirstScreen(tk.Tk):
             user_image = Image.open(self.image_path)
 
             # Mengubah ukuran gambar menjadi 150x140 piksel
-            user_image = user_image.resize((150, 140), Image.ANTIALIAS)
+            user_image = user_image.resize((150, 140), Image.LANCZOS)
 
             # Menyimpan gambar pengguna yang diubah ukurannya
             user_image.save('resized'+image_name)
@@ -224,13 +223,13 @@ class ChatScreen(tk.Canvas):
 
         # Membuat gambar thumbnail pengguna dan menyimpannya sebagai atribut
         user_image = Image.open(self.parent.image_path)
-        user_image = user_image.resize((40, 40), Image.ANTIALIAS)
+        user_image = user_image.resize((40, 40), Image.LANCZOS)
         self.user_image = ImageTk.PhotoImage(user_image)
 
         # Membuat gambar thumbnail untuk grup chat dan menyimpannya sebagai atribut
         global group_chat
         group_chat = Image.open('images/icon.png')
-        group_chat = group_chat.resize((60, 60), Image.ANTIALIAS)
+        group_chat = group_chat.resize((60, 60), Image.LANCZOS)
         group_chat = ImageTk.PhotoImage(group_chat)
 
         self.y = 140
@@ -321,7 +320,7 @@ class ChatScreen(tk.Canvas):
         for Emoji in emoji_data:
             global emojis
             emojis = Image.open(Emoji[0])
-            emojis = emojis.resize((20, 20), Image.ANTIALIAS)
+            emojis = emojis.resize((20, 20), Image.LANCZOS)
             emojis = ImageTk.PhotoImage(emojis)
 
             emoji_unicode = Emoji[1]
@@ -432,7 +431,7 @@ class ChatScreen(tk.Canvas):
 
         # Membuka dan mengubah ukuran gambar pengirim
         im = Image.open(f"{from_}.{sender_image_extension}")
-        im = im.resize((40, 40), Image.ANTIALIAS)
+        im = im.resize((40, 40), Image.LANCZOS)
         im = ImageTk.PhotoImage(im)
 
         # Membuat frame untuk menampilkan pesan
@@ -562,7 +561,7 @@ class ChatScreen(tk.Canvas):
 
                 # Memuat gambar pengguna dan mengubah ukurannya
                 user = Image.open(f"{user_id}.{extension}")
-                user = user.resize((45, 45), Image.ANTIALIAS)
+                user = user.resize((45, 45), Image.LANCZOS)
                 user = ImageTk.PhotoImage(user)
 
                 # Membuat label pengguna online
@@ -589,7 +588,7 @@ class ChatScreen(tk.Canvas):
 
             # Memuat gambar pengguna dan mengubah ukurannya
             user = Image.open(f"{user_id}.{extension}")
-            user = user.resize((45, 45), Image.ANTIALIAS)
+            user = user.resize((45, 45), Image.LANCZOS)
             user = ImageTk.PhotoImage(user)
 
             # Membuat label pengguna online

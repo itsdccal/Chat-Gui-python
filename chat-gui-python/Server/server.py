@@ -3,7 +3,7 @@ import struct
 import pickle
 import threading
 
-HOST = '10.5.30.172'
+HOST = '10.5.30.90'
 PORT = 6969
 
 # Membuat socket server
