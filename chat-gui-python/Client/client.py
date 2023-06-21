@@ -11,7 +11,7 @@ import threading
 import struct
 
 # Mengambil alamat IP lokal
-HOST = socket.gethostbyname(socket.gethostname())
+HOST = '10.5.30.172'
 # Port yang akan digunakan untuk koneksi
 PORT = 6969
 

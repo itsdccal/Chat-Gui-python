@@ -3,7 +3,7 @@ import struct
 import pickle
 import threading
 
-HOST = socket.gethostbyname(socket.gethostname())
+HOST = '10.5.30.172'
 PORT = 6969
 
 # Membuat socket server
