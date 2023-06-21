@@ -11,9 +11,10 @@ import threading
 import struct
 
 # Mengambil alamat IP lokal
-HOST = '10.5.30.90'
+HOST = '10.5.31.100'
 # Port yang akan digunakan untuk koneksi
 PORT = 6969
+
 
 class FirstScreen(tk.Tk):
     def __init__(self):
