@@ -34,21 +34,21 @@ class FirstScreen(tk.Tk):
         self.first_frame.pack(fill="both", expand=True)
 
         # Mengatur ikon aplikasi
-        app_icon = Image.open('chat-gui-python/images/icon.png')
+        app_icon = Image.open('images/icon.png')
         app_icon = ImageTk.PhotoImage(app_icon)
         self.iconphoto(False, app_icon)
 
         # Menyiapkan gambar latar belakang
-        background = Image.open("chat-gui-python/images/background-login.png")
+        background = Image.open("images/background-login.png")
         background = ImageTk.PhotoImage(background)
 
         # Menyiapkan gambar untuk tombol unggah gambar
-        upload_image = Image.open('chat-gui-python/images/send-img.png')
+        upload_image = Image.open('images/send-img.png')
         upload_image = upload_image.resize((25, 25), Image.ANTIALIAS)
         upload_image = ImageTk.PhotoImage(upload_image)
 
         # Mengatur gambar pengguna default
-        self.user_image = 'chat-gui-python/images/user.png'
+        self.user_image = 'images/user.png'
 
         # Menampilkan latar belakang
         tk.Label(self.first_frame, image=background).place(x=0, y=0)
@@ -76,7 +76,6 @@ class FirstScreen(tk.Tk):
         self.username_entry = tk.Entry(self.first_frame,  font="lucida 12 bold", width=10,
                                        highlightcolor="blue", highlightthickness=1)
         self.username_entry.place(x=212.7, y=344.1, width=214.6)
-
         self.username_entry.focus_set()
 
         # Tombol "Connect"
@@ -85,7 +84,7 @@ class FirstScreen(tk.Tk):
         submit_button.place(x=248, y=388.4)
 
         # Memulai perulangan utama
-        self.mainloop()
+        self.first_frame.mainloop()()
 
     def add_photo(self):
         # Memilih path file gambar menggunakan dialog file
@@ -230,7 +229,7 @@ class ChatScreen(tk.Canvas):
 
         # Membuat gambar thumbnail untuk grup chat dan menyimpannya sebagai atribut
         global group_chat
-        group_chat = Image.open('chat-gui-python/images/icon.png')
+        group_chat = Image.open('images/icon.png')
         group_chat = group_chat.resize((60, 60), Image.ANTIALIAS)
         group_chat = ImageTk.PhotoImage(group_chat)
 
@@ -295,26 +294,26 @@ class ChatScreen(tk.Canvas):
 
         # ---------------------------emoji code logic-----------------------------------
 
-        emoji_data = [('chat-gui-python/emojis/u0001f44a.png', '\U0001F44A'), ('chat-gui-python/emojis/u0001f44c.png', '\U0001F44C'), ('chat-gui-python/emojis/u0001f44d.png', '\U0001F44D'),
-                      ('chat-gui-python/emojis/u0001f495.png', '\U0001F495'), ('chat-gui-python/emojis/u0001f496.png',
-                                                                               '\U0001F496'), ('chat-gui-python/emojis/u0001f4a6.png', '\U0001F4A6'),
-                      ('chat-gui-python/emojis/u0001f4a9.png', '\U0001F4A9'), ('chat-gui-python/emojis/u0001f4af.png',
-                                                                               '\U0001F4AF'), ('chat-gui-python/emojis/u0001f595.png', '\U0001F595'),
-                      ('chat-gui-python/emojis/u0001f600.png', '\U0001F600'), ('chat-gui-python/emojis/u0001f602.png',
-                                                                               '\U0001F602'), ('chat-gui-python/emojis/u0001f603.png', '\U0001F603'),
-                      ('chat-gui-python/emojis/u0001f605.png', '\U0001F605'), ('chat-gui-python/emojis/u0001f606.png',
-                                                                               '\U0001F606'), ('chat-gui-python/emojis/u0001f608.png', '\U0001F608'),
-                      ('chat-gui-python/emojis/u0001f60d.png', '\U0001F60D'), ('chat-gui-python/emojis/u0001f60e.png',
-                                                                               '\U0001F60E'), ('chat-gui-python/emojis/u0001f60f.png', '\U0001F60F'),
-                      ('chat-gui-python/emojis/u0001f610.png', '\U0001F610'), ('chat-gui-python/emojis/u0001f618.png',
-                                                                               '\U0001F618'), ('chat-gui-python/emojis/u0001f61b.png', '\U0001F61B'),
-                      ('chat-gui-python/emojis/u0001f61d.png', '\U0001F61D'), ('chat-gui-python/emojis/u0001f621.png',
-                                                                               '\U0001F621'), ('chat-gui-python/emojis/u0001f624.png', '\U0001F621'),
-                      ('chat-gui-python/emojis/u0001f631.png', '\U0001F631'), ('chat-gui-python/emojis/u0001f632.png',
-                                                                               '\U0001F632'), ('chat-gui-python/emojis/u0001f634.png', '\U0001F634'),
-                      ('chat-gui-python/emojis/u0001f637.png', '\U0001F637'), ('chat-gui-python/emojis/u0001f642.png',
-                                                                               '\U0001F642'), ('chat-gui-python/emojis/u0001f64f.png', '\U0001F64F'),
-                      ('chat-gui-python/emojis/u0001f920.png', '\U0001F920'), ('chat-gui-python/emojis/u0001f923.png', '\U0001F923'), ('chat-gui-python/emojis/u0001f928.png', '\U0001F928')]
+        emoji_data = [('emojis/u0001f44a.png', '\U0001F44A'), ('emojis/u0001f44c.png', '\U0001F44C'), ('emojis/u0001f44d.png', '\U0001F44D'),
+                      ('emojis/u0001f495.png', '\U0001F495'), ('emojis/u0001f496.png',
+                                                               '\U0001F496'), ('emojis/u0001f4a6.png', '\U0001F4A6'),
+                      ('emojis/u0001f4a9.png', '\U0001F4A9'), ('emojis/u0001f4af.png',
+                                                               '\U0001F4AF'), ('emojis/u0001f595.png', '\U0001F595'),
+                      ('emojis/u0001f600.png', '\U0001F600'), ('emojis/u0001f602.png',
+                                                               '\U0001F602'), ('emojis/u0001f603.png', '\U0001F603'),
+                      ('emojis/u0001f605.png', '\U0001F605'), ('emojis/u0001f606.png',
+                                                               '\U0001F606'), ('emojis/u0001f608.png', '\U0001F608'),
+                      ('emojis/u0001f60d.png', '\U0001F60D'), ('emojis/u0001f60e.png',
+                                                               '\U0001F60E'), ('emojis/u0001f60f.png', '\U0001F60F'),
+                      ('emojis/u0001f610.png', '\U0001F610'), ('emojis/u0001f618.png',
+                                                               '\U0001F618'), ('emojis/u0001f61b.png', '\U0001F61B'),
+                      ('emojis/u0001f61d.png', '\U0001F61D'), ('emojis/u0001f621.png',
+                                                               '\U0001F621'), ('emojis/u0001f624.png', '\U0001F621'),
+                      ('emojis/u0001f631.png', '\U0001F631'), ('emojis/u0001f632.png',
+                                                               '\U0001F632'), ('emojis/u0001f634.png', '\U0001F634'),
+                      ('emojis/u0001f637.png', '\U0001F637'), ('emojis/u0001f642.png',
+                                                               '\U0001F642'), ('emojis/u0001f64f.png', '\U0001F64F'),
+                      ('emojis/u0001f920.png', '\U0001F920'), ('emojis/u0001f923.png', '\U0001F923'), ('emojis/u0001f928.png', '\U0001F928')]
 
         emoji_x_pos = 490
         emoji_y_pos = 520
